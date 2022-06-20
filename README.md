@@ -1,1 +1,1 @@
-# logs_analyzer_airflow
+# Analytical system of company image
