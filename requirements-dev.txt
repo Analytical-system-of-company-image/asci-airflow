@@ -1,0 +1,6 @@
+pylint
+autopep8
+apache-airflow
+ipython
+tqdm
+mypy
