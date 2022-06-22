@@ -51,7 +51,7 @@ def generate_start_urls_task(**kwargs) -> str:
 
     try:
         Generator = kwargs['generator_start_urls']
-        uri = ['uri']
+        uri = kwargs['uri']
     except KeyError as _:
         return json.dumps([])
     generator = Generator(uri)
@@ -69,7 +69,7 @@ def extract_reviews_task(**kwargs) -> str:
     start_urls = json.loads(start_urls[0])
 
     extract_settings = kwargs['extract_settings']
-    crawl_settings = {'start_urls': start_urls,
+    crawl_settings = {'start_urls': start_urls[:1000],
                       **extract_settings['crawl_settings']}
 
     reviews = extract_reviews(extract_settings['spider'],
