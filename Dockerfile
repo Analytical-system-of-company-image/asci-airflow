@@ -20,3 +20,4 @@ RUN pip install nltk
 RUN python3.10 -m nltk.downloader all
 RUN python3.10 -m dostoevsky download fasttext-social-network-model
 RUN pip install scrapingsubsystem
+RUN pip install logsparsersubsystem==1.0.6
