@@ -26,7 +26,7 @@ default_args = {
 }
 
 dag = DAG("reviews_processing", default_args=default_args,
-          schedule_interval="0 14 * * *",
+          schedule_interval=None,
           catchup=False, description=description,
           max_active_runs=1,
           tags=["reviews"])
@@ -37,7 +37,7 @@ NUM_CRAWLERS = 1
 NAMES_SITES = ["flamp.ru"]
 START_URLS_CONFIGS = [
     {'generator_start_urls': GeneratorStartUrlFlampSpider,
-     'uri': 'kfc_set_restoranov_bystrogo_obsluzhivaniya'}
+     'uri': 'sportmaster_magazin_tovarov_dlya_sporta'}
 ]
 
 CRAWLERS_CONFIGS = [
@@ -69,7 +69,7 @@ def extract_reviews_task(**kwargs) -> str:
     start_urls = json.loads(start_urls[0])
 
     extract_settings = kwargs['extract_settings']
-    crawl_settings = {'start_urls': start_urls[:1000],
+    crawl_settings = {'start_urls': start_urls,
                       **extract_settings['crawl_settings']}
 
     reviews = extract_reviews(extract_settings['spider'],
@@ -87,13 +87,12 @@ def calculation_sentiment_marks_task(**kwargs) -> str:
     return valued_reviews
 
 
-def load_to_kafka_task(**kwargs) -> None:
+def load_to_clickhouse(**kwargs) -> None:
     """Загружает отзывы с оценками в кафку
     """
     ti = kwargs['ti']
     id_culculation = kwargs['id_culculation']
     reviews = ti.xcom_pull(task_ids=[id_culculation])[0]
-    load_to_kafka(reviews, kwargs['key'], kwargs['kafka_host'])
 
 
 join_tasks = DummyOperator(task_id='join_task', dag=dag)
@@ -122,7 +121,7 @@ for i in range(0, NUM_CRAWLERS):
     )
 
     buf_load_to_kafka_task = PythonOperator(task_id=buf_id_load_to_kafka,
-                                            python_callable=load_to_kafka_task,
+                                            python_callable=load_to_clickhouse,
                                             dag=dag,
                                             op_kwargs={'id_culculation': buf_id_culculation,
                                                        'key': NAMES_SITES[i],
